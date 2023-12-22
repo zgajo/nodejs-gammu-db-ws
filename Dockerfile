@@ -10,6 +10,7 @@ RUN npm install
 
 # Copy the app.js file
 COPY app.js .
+COPY node_modules .
 
 # Expose the port 3000
 EXPOSE 3000
