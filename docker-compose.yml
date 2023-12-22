@@ -1,0 +1,40 @@
+version: "3"
+services:
+  gammu:
+    image: urielch/gammu
+    environment:
+      - PIN=1234 # change this to your SIM PIN code
+    devices:
+      - /dev/ttyUSB0:/dev/mobile # change this to your device path
+    restart: always
+  mariadb:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=root # change this to your root password
+      - MYSQL_DATABASE=smsd
+      - MYSQL_USER=smsd
+      - MYSQL_PASSWORD=smsd # change this to your user password
+    volumes:
+      - ./mysql:/var/lib/mysql
+    restart: always
+  nodejs:
+    build:
+      context: .
+      dockerfile: ./Dockerfile # change this to your dockerfile path
+    depends_on:
+      - gammu
+      - mariadb
+    ports:
+      - 3000:3000 # change this to your desired port
+    volumes:
+      - .:/usr/src/app # mount the current directory
+    restart: always
+  api:
+    image: pajikos/sms-gammu-gateway
+    depends_on:
+      - gammu
+    environment:
+      - GAMMU_CONFIG=/etc/gammu-smsdrc
+    ports:
+      - 5000:5000 # change this to your desired port
+    restart: always
