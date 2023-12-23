@@ -20,6 +20,7 @@ function getNetworkInfo(req, res) {
 
   exec(cmd, function (error, stdout, stderr) {
     console.log("Requesting Network Information: Done");
+    console.log("stdout", stdout);
     res.setHeader("Content-Type", "application/json");
     res.json({ result: stdout, errormsg: stderr, errorout: error });
   });
@@ -27,7 +28,7 @@ function getNetworkInfo(req, res) {
 
 function sendSMS(req, res) {
   console.log("Request to Send SMS received...");
-  const { number, message, validity } = req.body;
+  const { number, message } = req.query;
 
   if (!number) {
     res.status(400).json({ error: "Number is not defined" });
@@ -45,15 +46,7 @@ function sendSMS(req, res) {
     return;
   }
 
-  if (!validity) {
-    res.status(400).json({ error: "Validity is not defined" });
-    console.log(
-      "ERROR: Request to Send SMS received: Validity is not defined. Exit."
-    );
-    return;
-  }
-
-  const cmd = `gammu -c /etc/gammu-smsdrc sendsms TEXT ${number} -text "${message}" -validity ${validity}`;
+  const cmd = `gammu -c /etc/gammu-smsdrc sendsms TEXT ${number} -text "${message}"`;
   console.log(`Request to Send SMS: Call command:  "${cmd}"`);
 
   exec(cmd, function (error, stdout, stderr) {
