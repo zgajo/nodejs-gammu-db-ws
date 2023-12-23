@@ -28,7 +28,7 @@ function getNetworkInfo(req, res) {
 
 function sendSMS(req, res) {
   console.log("Request to Send SMS received...");
-  const { number, message } = req.query;
+  const { number, message } = req.body;
 
   if (!number) {
     res.status(400).json({ error: "Number is not defined" });
