@@ -27,7 +27,7 @@ services:
     ports:
       - 3000:3000 # change this to your desired port
     volumes:
-      - .:/usr/src/app # mount the current directory
+      - node_modules:/usr/src/app/node_modules
     restart: always
   api:
     image: pajikos/sms-gammu-gateway
@@ -38,3 +38,7 @@ services:
     ports:
       - 5000:5000 # change this to your desired port
     restart: always
+
+volumes:
+  node_modules:
+    name: "zlatni-cesalj-sms-gateway"
