@@ -57,7 +57,7 @@ function sendSMS(req, res) {
       console.log("Request to Send SMS: Done");
     } else {
       res.status(500);
-      console.log("Request to Send SMS: FAILED");
+      console.log("Request to Send SMS: FAILED", stderr, error);
     }
 
     res.json({ result: stdout, errormsg: stderr, errorout: error });
