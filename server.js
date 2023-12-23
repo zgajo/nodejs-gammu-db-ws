@@ -67,7 +67,7 @@ function sendSMS(req, res) {
 // Routes
 app.get("/", getRoot);
 app.get("/networkinfo", getNetworkInfo);
-app.get("/sendsms", sendSMS);
+app.post("/sendsms", sendSMS);
 
 // Start server
 app.listen(port, () => {
