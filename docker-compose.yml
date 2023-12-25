@@ -1,12 +1,5 @@
 version: "3"
 services:
-  gammu:
-    image: urielch/gammu
-    environment:
-      - PIN= # change this to your SIM PIN code
-    devices:
-      - /dev/ttyUSB0:/dev/mobile # change this to your device path
-    restart: always
   mariadb:
     image: mariadb
     environment:
@@ -22,21 +15,11 @@ services:
       context: .
       dockerfile: ./Dockerfile # change this to your dockerfile path
     depends_on:
-      - gammu
       - mariadb
     ports:
       - 3000:3000 # change this to your desired port
     volumes:
       - node_modules:/usr/src/app/node_modules
-    restart: always
-  api:
-    image: pajikos/sms-gammu-gateway
-    depends_on:
-      - gammu
-    environment:
-      - GAMMU_CONFIG=/etc/gammu-smsdrc
-    ports:
-      - 5000:5000 # change this to your desired port
     restart: always
 
 volumes:

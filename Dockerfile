@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 3000
 
 # Set the app.js file as the entrypoint
-ENTRYPOINT ["node", "app.js"]
+ENTRYPOINT ["node", "server.js"]

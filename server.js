@@ -6,7 +6,7 @@ const { exec } = require("child_process");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const port = 3001;
+const port = 3000;
 const appVersion = "SMSRestAPI Version 005";
 
 // Route handlers
@@ -52,7 +52,7 @@ function sendSMS(req, res) {
   exec(cmd, function (error, stdout, stderr) {
     console.log("Request to Send SMS: Result: " + stdout);
     res.setHeader("Content-Type", "application/json");
-    if (stdout.includes("OK")) {
+    if (stdout.includes("OK") || stdout.includes("Created outbox message")) {
       res.status(200);
       console.log("Request to Send SMS: Done");
     } else {
