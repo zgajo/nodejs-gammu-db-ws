@@ -36,5 +36,4 @@ services:
 
 volumes:
   node_modules:
-    name: "zlatni-cesalj-sms-gateway"
   mysql-data:
