@@ -2,14 +2,26 @@ version: "3"
 services:
   mariadb:
     image: mariadb
+    container_name: MySQL
     environment:
       - MYSQL_ROOT_PASSWORD=root # change this to your root password
       - MYSQL_DATABASE=smsd
       - MYSQL_USER=smsd
       - MYSQL_PASSWORD=smsd # change this to your user password
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
+      - ./sql-scripts:/docker-entrypoint-initdb.d
     restart: always
+
+  phpmyadmin:
+    image: phpmyadmin:5.2.0
+    container_name: PhpMyAdmin
+    restart: always
+    ports:
+      - 5013:80
+    environment:
+      - PMA_ARBITRARY=1
+
   nodejs:
     build:
       context: .
@@ -25,3 +37,4 @@ services:
 volumes:
   node_modules:
     name: "zlatni-cesalj-sms-gateway"
+  mysql-data:
