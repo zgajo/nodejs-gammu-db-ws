@@ -46,7 +46,7 @@ function sendSMS(req, res) {
     return;
   }
 
-  const cmd = `gammu -c /etc/gammurc --sendsms TEXT ${number} -text "${message}"`;
+  const cmd = `gammu-smsd-inject TEXT ${number} -unicode -text "${message}"`;
   console.log(`Request to Send SMS: Call command:  "${cmd}"`);
 
   exec(cmd, function (error, stdout, stderr) {

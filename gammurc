@@ -1,0 +1,24 @@
+# Configuration file for Gammu SMS Daemon
+
+# Gammu library configuration, see gammurc(5)
+[gammu]
+device = /dev/ttyUSB0
+connection = at
+logfile = /var/log/gammu.log
+
+# SMSD configuration, see gammu-smsdrc(5)
+[smsd]
+#pin = 1234
+service = files
+logfile = /var/log/gammu-smsd
+debuglevel = 4
+ReceiveFrequency = 300
+DeliveryReport = sms
+# Paths where messages are stored
+inboxpath = /var/spool/gammu/inbox/
+outboxpath = /var/spool/gammu/outbox/
+sentsmspath = /var/spool/gammu/sent/
+errorsmspath = /var/spool/gammu/error/
+
+#SMSC = +385
+
