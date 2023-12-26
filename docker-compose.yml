@@ -12,6 +12,8 @@ services:
       - mysql-data:/var/lib/mysql
       - ./sql-scripts:/docker-entrypoint-initdb.d
     restart: always
+    ports:
+      - "3306:3306"
 
   phpmyadmin:
     image: phpmyadmin:5.2.0
@@ -29,7 +31,7 @@ services:
     depends_on:
       - mariadb
     ports:
-      - 3000:3000 # change this to your desired port
+      - 3000:3001 # change this to your desired port
     volumes:
       - node_modules:/usr/src/app/node_modules
     restart: always

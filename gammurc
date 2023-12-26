@@ -9,16 +9,22 @@ logfile = /var/log/gammu.log
 # SMSD configuration, see gammu-smsdrc(5)
 [smsd]
 #pin = 1234
-service = files
+service = sql
+driver = native_mysql
+host = 127.0.0.1
+user = smsd
+password = smsd
+database = smsd
+sql = mysql
+#service = files
 logfile = /var/log/gammu-smsd
 debuglevel = 4
-ReceiveFrequency = 300
+ReceiveFrequency = 15
 DeliveryReport = sms
 # Paths where messages are stored
-inboxpath = /var/spool/gammu/inbox/
-outboxpath = /var/spool/gammu/outbox/
-sentsmspath = /var/spool/gammu/sent/
-errorsmspath = /var/spool/gammu/error/
+#inboxpath = /var/spool/gammu/inbox/
+#outboxpath = /var/spool/gammu/outbox/
+#sentsmspath = /var/spool/gammu/sent/
+#errorsmspath = /var/spool/gammu/error/
 
 #SMSC = +385
-

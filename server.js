@@ -6,7 +6,7 @@ const { exec } = require("child_process");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const port = 3000;
+const port = 3001;
 const appVersion = "SMSRestAPI Version 005";
 
 // Route handlers
@@ -46,7 +46,7 @@ function sendSMS(req, res) {
     return;
   }
 
-  const cmd = `gammu-smsd-inject TEXT ${number} -unicode -text "${message}"`;
+  const cmd = `sudo gammu-smsd-inject TEXT ${number} -unicode -text "${message}"`;
   console.log(`Request to Send SMS: Call command:  "${cmd}"`);
 
   exec(cmd, function (error, stdout, stderr) {
