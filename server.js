@@ -4,10 +4,20 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const { exec } = require("child_process");
+const jwt = require("jsonwebtoken");
 
 const connect = function () {
-  console.log("connect fn");
-  const ws = new WebSocket("ws://127.0.0.1:8080/");
+  const token = jwt.sign({}, processEnv.PRIVATE_GATEWAY_KEY, {
+    expiresIn: "1m",
+    algorithm: "RS256",
+    audience: processEnv.JWT_AUDIENCE,
+  });
+
+  const ws = new WebSocket(processEnv.WS_HOST, {
+    headers: {
+      Authorization: token,
+    },
+  });
 
   ws.on("message", function incoming(data, isBinary) {
     const message = isBinary ? data : data.toString();
