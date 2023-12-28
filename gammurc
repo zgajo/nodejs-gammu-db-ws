@@ -20,6 +20,8 @@ sql = mysql
 logfile = /var/log/gammu-smsd
 debuglevel = 4
 ReceiveFrequency = 15
+RetryTimeout = 15
+SendTimeout = 15
 DeliveryReport = sms
 # Paths where messages are stored
 #inboxpath = /var/spool/gammu/inbox/

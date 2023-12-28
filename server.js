@@ -1,7 +1,35 @@
+const processEnv = require("./envs");
+const WebSocket = require("isomorphic-ws");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const { exec } = require("child_process");
+
+const connect = function () {
+  console.log("connect fn");
+  const ws = new WebSocket("ws://127.0.0.1:8080/");
+
+  ws.on("message", function incoming(data, isBinary) {
+    const message = isBinary ? data : data.toString();
+    const parsedMessage = JSON.parse(message);
+
+    sendSms(parsedMessage.number, parsedMessage.message);
+  });
+
+  ws.on("open", function open() {
+    console.log("connected");
+  });
+
+  ws.on("error", function (err) {
+    console.log("socket error", err);
+  });
+
+  ws.on("close", function () {
+    console.log("socket close");
+    setTimeout(connect, 10000);
+  });
+};
+connect();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -26,7 +54,43 @@ function getNetworkInfo(req, res) {
   });
 }
 
-function sendSMS(req, res) {
+function sendSms(phone, message) {
+  if (!phone) {
+    console.log(
+      "ERROR: Request to Send SMS received: Phone number is not defined. Exit."
+    );
+    throw new Error({ error: "Phone number is not defined" });
+  }
+
+  if (!message) {
+    console.log(
+      "ERROR: Request to Send SMS received: Message is not defined. Exit."
+    );
+    throw new Error({ error: "Message is not defined" });
+  }
+
+  const cmd = `sudo gammu-smsd-inject TEXT ${
+    processEnv.OVERRIDE_PHONE_NUMBER || phone
+  } -unicode -text "${message}"`;
+  console.log(`Request to Send SMS: Call command:  "${cmd}"`);
+
+  exec(cmd, function (error, stdout, stderr) {
+    console.log("Request to Send SMS: Result: " + stdout);
+    if (
+      stdout.includes("OK") ||
+      stdout.includes("Created outbox message") ||
+      stdout.includes("Written message with ID")
+    ) {
+      console.log("Request to Send SMS: Done");
+      return true;
+    } else {
+      console.log("Request to Send SMS: FAILED", stderr, error);
+      throw new Error({ error: stderr, errorout: error });
+    }
+  });
+}
+
+function sendSMSRequest(req, res) {
   console.log("Request to Send SMS received...");
   const { number, message } = req.body;
 
@@ -46,28 +110,17 @@ function sendSMS(req, res) {
     return;
   }
 
-  const cmd = `sudo gammu-smsd-inject TEXT ${number} -unicode -text "${message}"`;
-  console.log(`Request to Send SMS: Call command:  "${cmd}"`);
-
-  exec(cmd, function (error, stdout, stderr) {
-    console.log("Request to Send SMS: Result: " + stdout);
-    res.setHeader("Content-Type", "application/json");
-    if (stdout.includes("OK") || stdout.includes("Created outbox message")) {
-      res.status(200);
-      console.log("Request to Send SMS: Done");
-    } else {
-      res.status(500);
-      console.log("Request to Send SMS: FAILED", stderr, error);
-    }
-
-    res.json({ result: stdout, errormsg: stderr, errorout: error });
-  });
+  return sendSms(number, message)
+    .then(() => res.status(200))
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
 }
 
 // Routes
 app.get("/", getRoot);
 app.get("/networkinfo", getNetworkInfo);
-app.post("/sendsms", sendSMS);
+app.post("/sendsms", sendSMSRequest);
 
 // Start server
 app.listen(port, () => {
