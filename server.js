@@ -81,7 +81,7 @@ function sendSms(phone, message) {
 
   const cmd = `sudo gammu-smsd-inject TEXT ${
     processEnv.OVERRIDE_PHONE_NUMBER || phone
-  } -unicode -text "${message}"`;
+  } -unicode -text "${message}" -len 400`;
   console.log(`Request to Send SMS: Call command:  "${cmd}"`);
 
   exec(cmd, function (error, stdout, stderr) {
