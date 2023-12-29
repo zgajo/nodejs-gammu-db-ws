@@ -24,18 +24,6 @@ services:
     environment:
       - PMA_ARBITRARY=1
 
-  nodejs:
-    build:
-      context: .
-      dockerfile: ./Dockerfile # change this to your dockerfile path
-    depends_on:
-      - mariadb
-    ports:
-      - 5000:3001 # change this to your desired port
-    volumes:
-      - node_modules:/usr/src/app/node_modules
-    restart: always
 
 volumes:
-  node_modules:
   mysql-data:
