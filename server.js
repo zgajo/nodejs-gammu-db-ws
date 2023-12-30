@@ -6,9 +6,11 @@ const bodyParser = require("body-parser");
 const { exec } = require("child_process");
 const jwt = require("jsonwebtoken");
 
+const logger = require("pino")({ level: processEnv.LOG_LEVEL });
+
 const connect = function () {
   const token = jwt.sign({}, processEnv.PRIVATE_GATEWAY_KEY, {
-    expiresIn: "1m",
+    expiresIn: "10m",
     algorithm: "RS256",
     audience: processEnv.JWT_AUDIENCE,
   });
@@ -26,16 +28,19 @@ const connect = function () {
     sendSms(parsedMessage.number, parsedMessage.message);
   });
 
-  ws.on("open", function open() {
-    console.log("connected");
+  ws.on("open", function open(socket) {
+    logger.debug("connected");
+    setInterval(() => {
+      ws.ping();
+    }, 30000);
   });
 
   ws.on("error", function (err) {
-    console.log("socket error", err);
+    logger.warn("socket error", err);
   });
 
   ws.on("close", function () {
-    console.log("socket close");
+    logger.info("socket close");
     setTimeout(connect, 10000);
   });
 };
@@ -54,11 +59,11 @@ function getRoot(req, res) {
 
 function getNetworkInfo(req, res) {
   const cmd = "gammu -c /etc/gammurc networkinfo";
-  console.log("Requesting Network Information...");
+  logger.debug("Requesting Network Information...");
 
   exec(cmd, function (error, stdout, stderr) {
-    console.log("Requesting Network Information: Done");
-    console.log("stdout", stdout);
+    logger.debug("Requesting Network Information: Done");
+    logger.debug("stdout", stdout);
     res.setHeader("Content-Type", "application/json");
     res.json({ result: stdout, errormsg: stderr, errorout: error });
   });
@@ -66,14 +71,14 @@ function getNetworkInfo(req, res) {
 
 function sendSms(phone, message) {
   if (!phone) {
-    console.log(
+    logger.info(
       "ERROR: Request to Send SMS received: Phone number is not defined. Exit."
     );
     throw new Error({ error: "Phone number is not defined" });
   }
 
   if (!message) {
-    console.log(
+    logger.info(
       "ERROR: Request to Send SMS received: Message is not defined. Exit."
     );
     throw new Error({ error: "Message is not defined" });
@@ -82,31 +87,31 @@ function sendSms(phone, message) {
   const cmd = `sudo gammu-smsd-inject TEXT ${
     processEnv.OVERRIDE_PHONE_NUMBER || phone
   } -unicode -text "${message}" -len 400`;
-  console.log(`Request to Send SMS: Call command:  "${cmd}"`);
+  logger.info(`Request to Send SMS: Call command:  "${cmd}"`);
 
   exec(cmd, function (error, stdout, stderr) {
-    console.log("Request to Send SMS: Result: " + stdout);
+    logger.debug("Request to Send SMS: Result: " + stdout);
     if (
       stdout.includes("OK") ||
       stdout.includes("Created outbox message") ||
       stdout.includes("Written message with ID")
     ) {
-      console.log("Request to Send SMS: Done");
+      logger.debug("Request to Send SMS: Done");
       return true;
     } else {
-      console.log("Request to Send SMS: FAILED", stderr, error);
+      logger.error("Request to Send SMS: FAILED", stderr, error);
       throw new Error({ error: stderr, errorout: error });
     }
   });
 }
 
 function sendSMSRequest(req, res) {
-  console.log("Request to Send SMS received...");
+  logger.debug("Request to Send SMS received...");
   const { number, message } = req.body;
 
   if (!number) {
     res.status(400).json({ error: "Number is not defined" });
-    console.log(
+    logger.debug(
       "ERROR: Request to Send SMS received: Number is not defined. Exit."
     );
     return;
@@ -114,7 +119,7 @@ function sendSMSRequest(req, res) {
 
   if (!message) {
     res.status(400).json({ error: "Message is not defined" });
-    console.log(
+    logger.debug(
       "ERROR: Request to Send SMS received: Message is not defined. Exit."
     );
     return;
@@ -134,12 +139,12 @@ app.post("/sendsms", sendSMSRequest);
 
 // Start server
 app.listen(port, () => {
-  console.log(
+  logger.debug(
     "--------------------------------------------------------------------"
   );
-  console.log(appVersion);
-  console.log(
+  logger.debug(appVersion);
+  logger.debug(
     "--------------------------------------------------------------------"
   );
-  console.log("MindFabrik ChatSMS API Server is running on port " + port);
+  logger.debug("MindFabrik ChatSMS API Server is running on port " + port);
 });

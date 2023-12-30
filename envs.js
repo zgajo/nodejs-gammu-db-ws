@@ -9,6 +9,11 @@ const processEnv = envsafe({
   PRIVATE_GATEWAY_KEY: str(),
   WS_HOST: url(),
   JWT_AUDIENCE: str(),
+  LOG_LEVEL: str({
+    allowEmpty: true,
+    choices: ["trace", "debug", "info", "warn", "error", "fatal"],
+    default: "info",
+  }),
 });
 
 module.exports = processEnv;
